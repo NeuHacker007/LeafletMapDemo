@@ -40,7 +40,9 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+/src/app/MapData
 
 # System Files
 .DS_Store
 Thumbs.db
+/src/app/MapData/
