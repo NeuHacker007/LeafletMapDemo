@@ -93,6 +93,17 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public onMapReady(map: L.Map) {
     this.leafletMap = map ? map : undefined;
+    this.setAcarStationLayerFromGeoJson();
+    this.setAirportLayerFromGeoJson();
+    this.setVdlStationLayerFromGeoJson();
+    this.layersControl.overlays = {
+      acarstation: this.acarstationLayer,
+      airport: this.airportLayer,
+      vdlstation: this.vdlstationLayer
+    }
+  }
+
+  private setAcarStationLayerFromGeoJson(): void {
     this.acarstationLayer = L.geoJSON(this.acarStationGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
           const maker = new L.Marker(latlng, this.acarStationMakerOption).bindTooltip(
@@ -118,12 +129,75 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       }
     );
-    this.layersControl.overlays = {
-      acarstation: this.acarstationLayer
-    }
   }
 
-  apply(): boolean {
+  private setAirportLayerFromGeoJson(): void {
+    this.airportLayer = L.geoJSON(this.airportGeoJsonData, {
+        pointToLayer: (geoJsonPoint, latlng): L.Layer => {
+          const maker = new L.Marker(latlng, this.airportMakerOption).bindTooltip(
+            geoJsonPoint.properties.iata,
+            {
+              permanent: true,
+              offset: L.point(30, 30)
+            })
+          return maker;
+        },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties
+            && feature.properties.iata
+            && feature.properties.frequency
+            && feature.properties.numberOfVHFStations
+            && feature.properties.airport
+            && feature.properties.city
+            && feature.properties.state
+            && feature.properties.country
+          ) {
+            const message = `
+            I am an Airport <br>
+            Airport Name: ${feature.properties.airport} <br>
+            IATA Code: ${feature.properties.iata} <br>
+            Num of VHF Station: ${feature.properties.numberOfVHFStations} <br>
+            City: ${feature.properties.city} <br>
+            State: ${feature.properties.state} <br>
+            Country: ${feature.properties.country} <br>
+            Frequency: ${feature.properties.frequency}
+            `;
+            layer.bindPopup(message);
+          }
+        }
+      }
+    );
+  }
+
+  private setVdlStationLayerFromGeoJson(): void {
+    this.vdlstationLayer = L.geoJSON(this.vdlGeoJsonData, {
+        pointToLayer: (geoJsonPoint, latlng): L.Layer => {
+          const maker = new L.Marker(latlng, this.vdlStationMakerOption).bindTooltip(
+            geoJsonPoint.properties.iata,
+            {
+              permanent: true,
+              offset: L.point(30, 30)
+            })
+          return maker;
+        },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties
+            && feature.properties.iata
+            && feature.properties.frequency
+          ) {
+            const message = `
+            I am an Vdl station <br>
+            IATA Code: ${feature.properties.iata} <br>
+            Frequency: ${feature.properties.frequency}
+            `;
+            layer.bindPopup(message);
+          }
+        }
+      }
+    );
+  }
+
+  private apply(): boolean {
     this.layers.push(this.LAYER_OSM);
     return false;
   }
