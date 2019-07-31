@@ -21,8 +21,11 @@
     "@angular/router": "~8.1.2",
     "@asymmetrik/ngx-leaflet": "^6.0.1",
     "@fortawesome/angular-fontawesome": "^0.4.0",
+    "bootstrap": "^4.3.1",
+    "geojson-vt": "^3.2.1",
     "leaflet": "^1.5.1",
     "leaflet-canvas-marker-labinno": "^1.0.0",
+    "rbush": "^2.0.2",
     "rxjs": "~6.4.0",
     "tslib": "^1.9.0",
     "zone.js": "~0.9.1"

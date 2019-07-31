@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as L from 'leaflet';
+import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers.standalone';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
-import {icon} from "leaflet";
 
 @Component({
   selector: 'app-root',
@@ -28,7 +28,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private airportMakerOption = {
     icon: new L.Icon({
       iconUrl: '../assets/Airport_symbol.svg',
-      iconSize: [18, 18]
+      iconSize: [24, 24]
     })
   };
   private vdlStationMakerOption = {
@@ -43,7 +43,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly LAYER_OSM = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 13,
     attribution: 'Open Street Map'
-  })
+  });
 
   public layers: L.Layer[] = [];
   public layersControl = {
@@ -74,12 +74,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
 
     this.apply();
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     if (this.acarStationSubscription) {
       this.acarStationSubscription.unsubscribe();
     }
@@ -91,11 +91,23 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  public drawAcarStationCircle(event: MouseEvent): void {
+
+  }
+
+  public drawAirportCircle(event: MouseEvent): void {
+
+  }
+
+  public drawVdlStationCircle(event: MouseEvent): void {
+
+  }
   public onMapReady(map: L.Map) {
     this.leafletMap = map ? map : undefined;
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
+
     this.layersControl.overlays = {
       acarstation: this.acarstationLayer,
       airport: this.airportLayer,
@@ -111,7 +123,7 @@ export class AppComponent implements OnInit, OnDestroy {
             {
               permanent: true,
               offset: L.point(30, 30)
-            })
+            });
           return maker;
         },
         onEachFeature: (feature, layer) => {

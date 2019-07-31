@@ -1,1 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
+.acarStationMaker {
+  content: url("./assets/broadcast-tower-solid.svg");
+}
+
+.mediumIconSize {
+  height: 24px;
+  width: 24px;
+}
