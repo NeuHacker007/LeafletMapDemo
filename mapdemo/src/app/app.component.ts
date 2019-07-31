@@ -8,6 +8,7 @@ import {takeLast} from "rxjs/operators";
 
 const NAUTICAL_MILE_PER_METER = 0.000539957;
 const CIRCLE_RADIUS_IN_NATUTICALMILE = 200;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -24,8 +25,11 @@ export class AppComponent implements OnInit, OnDestroy {
   private vdlstationLayer;
 
   private acarStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
+  private acarStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private airportCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
+  private airportMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private vdlStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
+  private vdlStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
 
   private acarStationMakerOption = {
     icon: new L.Icon({
@@ -83,7 +87,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-
     this.apply();
   }
 
@@ -96,6 +99,54 @@ export class AppComponent implements OnInit, OnDestroy {
     }
     if (this.vdlStationSubscription) {
       this.vdlStationSubscription.unsubscribe();
+    }
+  }
+
+  public enableToolTip(event: MouseEvent) {
+    if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
+      this.acarstationLayer.eachLayer((layer: L.Layer) => {
+        if (!layer.isTooltipOpen()) {
+          layer.openTooltip();
+        }
+      });
+    }
+    if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
+      this.acarstationLayer.eachLayer((layer: L.Layer) => {
+        if (!layer.isTooltipOpen()) {
+          layer.openTooltip();
+        }
+      });
+    }
+    if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
+      this.vdlstationLayer.eachLayer((layer: L.Layer) => {
+        if (!layer.isTooltipOpen()) {
+          layer.openTooltip();
+        }
+      });
+    }
+  }
+
+  public disableToolTip(event: MouseEvent) {
+    if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
+      this.acarstationLayer.eachLayer((layer: L.Layer) => {
+        if (layer.isTooltipOpen()) {
+          layer.closeTooltip();
+        }
+      });
+    }
+    if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
+      this.acarstationLayer.eachLayer((layer: L.Layer) => {
+        if (layer.isTooltipOpen()) {
+          layer.closeTooltip();
+        }
+      });
+    }
+    if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
+      this.vdlstationLayer.eachLayer((layer: L.Layer) => {
+        if (layer.isTooltipOpen()) {
+          layer.closeTooltip();
+        }
+      });
     }
   }
 
@@ -161,6 +212,7 @@ export class AppComponent implements OnInit, OnDestroy {
       alert('Acar layer is not active')
     }
   }
+
   public onMapReady(map: L.Map) {
     this.leafletMap = map ? map : undefined;
     this.setAcarStationLayerFromGeoJson();
