@@ -1,9 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as L from 'leaflet';
 import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers.standalone';
+import * as Geojson from 'geojson';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
+import {takeLast} from "rxjs/operators";
 
+const NAUTICAL_MILE_PER_METER = 0.000539957;
+const CIRCLE_RADIUS_IN_NATUTICALMILE = 200;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -18,6 +22,10 @@ export class AppComponent implements OnInit, OnDestroy {
   private acarstationLayer;
   private airportLayer;
   private vdlstationLayer;
+
+  private acarStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
+  private airportCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
+  private vdlStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
 
   private acarStationMakerOption = {
     icon: new L.Icon({
@@ -92,27 +100,107 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public drawAcarStationCircle(event: MouseEvent): void {
-
+    if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
+      this.acarstationLayer.eachLayer((layer: L.Layer) => {
+        const features: Geojson.FeatureCollection = layer['feature'];
+        const geometry: Geojson.Geometry = features['geometry'];
+        const circle: L.Circle = L.circle(
+          [geometry['coordinates'][1], geometry['coordinates'][0]],
+          {
+            radius: CIRCLE_RADIUS_IN_NATUTICALMILE / NAUTICAL_MILE_PER_METER,
+            color: '#ff6666',
+            dashArray: '10',
+            fill: false
+          }
+        ).addTo(this.leafletMap)
+        this.acarStationCircleTracker.set(geometry['coordinates'], circle);
+      });
+    } else {
+      alert('Acar layer is not active')
+    }
   }
 
   public drawAirportCircle(event: MouseEvent): void {
-
+    if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
+      this.airportLayer.eachLayer((layer: L.Layer) => {
+        const features: Geojson.FeatureCollection = layer['feature'];
+        const geometry: Geojson.Geometry = features['geometry'];
+        const circle: L.Circle = L.circle(
+          [geometry['coordinates'][1], geometry['coordinates'][0]],
+          {
+            radius: CIRCLE_RADIUS_IN_NATUTICALMILE / NAUTICAL_MILE_PER_METER,
+            color: '#ff6666',
+            dashArray: '10',
+            fill: false
+          }
+        ).addTo(this.leafletMap)
+        this.airportCircleTracker.set(geometry['coordinates'], circle);
+      });
+    } else {
+      alert('airport layer is not active')
+    }
   }
 
   public drawVdlStationCircle(event: MouseEvent): void {
-
+    if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
+      this.vdlstationLayer.eachLayer((layer: L.Layer) => {
+        const features: Geojson.FeatureCollection = layer['feature'];
+        const geometry: Geojson.Geometry = features['geometry'];
+        const circle: L.Circle = L.circle(
+          [geometry['coordinates'][1], geometry['coordinates'][0]],
+          {
+            radius: CIRCLE_RADIUS_IN_NATUTICALMILE / NAUTICAL_MILE_PER_METER,
+            color: '#ff6666',
+            dashArray: '10',
+            fill: false
+          }
+        ).addTo(this.leafletMap)
+        this.vdlStationCircleTracker.set(geometry['coordinates'], circle);
+      });
+    } else {
+      alert('Acar layer is not active')
+    }
   }
   public onMapReady(map: L.Map) {
     this.leafletMap = map ? map : undefined;
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
-
     this.layersControl.overlays = {
       acarstation: this.acarstationLayer,
       airport: this.airportLayer,
       vdlstation: this.vdlstationLayer
     }
+    this.leafletMap.on("overlayremove", () => {
+      if (
+        this.leafletMap
+        && !this.leafletMap.hasLayer(this.acarstationLayer)
+        && this.acarStationCircleTracker.size > 0
+      ) {
+        this.acarStationCircleTracker.forEach((value, key) => {
+          this.leafletMap.removeLayer(value);
+        });
+      }
+      if (
+        this.leafletMap
+        && !this.leafletMap.hasLayer(this.airportLayer)
+        && this.airportCircleTracker.size > 0
+      ) {
+        this.airportCircleTracker.forEach((value, key) => {
+          this.leafletMap.removeLayer(value);
+        });
+      }
+      if (
+        this.leafletMap
+        && !this.leafletMap.hasLayer(this.vdlstationLayer)
+        && this.vdlStationCircleTracker.size > 0
+      ) {
+        this.vdlStationCircleTracker.forEach((value, key) => {
+          this.leafletMap.removeLayer(value);
+        });
+      }
+    });
+
   }
 
   private setAcarStationLayerFromGeoJson(): void {
