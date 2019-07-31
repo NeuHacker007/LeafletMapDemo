@@ -3,6 +3,7 @@ import {NgModule} from '@angular/core';
 import {LeafletModule} from '@asymmetrik/ngx-leaflet';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
+import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 
 @NgModule({
   declarations: [
@@ -13,7 +14,7 @@ import {AppComponent} from './app.component';
     AppRoutingModule,
     LeafletModule.forRoot()
   ],
-  providers: [],
+  providers: [AsimsAcarsService, AsimsAirportsService, AsimsVdlService],
   bootstrap: [AppComponent]
 })
 export class AppModule {
