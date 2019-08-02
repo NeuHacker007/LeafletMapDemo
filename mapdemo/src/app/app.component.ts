@@ -4,7 +4,6 @@ import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-mar
 import * as Geojson from 'geojson';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
-import {takeLast} from "rxjs/operators";
 
 const NAUTICAL_MILE_PER_METER = 0.000539957;
 const CIRCLE_RADIUS_IN_NATUTICALMILE = 200;
@@ -66,7 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
   };
   public options = {
     zoom: 13,
-    center: L.latLng(39.1696, -76.6786,)
+    center: L.latLng(39.1696, -76.6786)
   };
 
   constructor(
