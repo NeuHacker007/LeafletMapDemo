@@ -52,6 +52,7 @@ export class AppComponent implements OnInit, OnDestroy {
     icon: new L.Icon({
       iconUrl: '../assets/broadcast-tower-solid.svg',
       iconSize: [24, 24],
+      // To make the leaflet canvas marker working properly, we had to provide icon anchor
       iconAnchor: [0, 0]
     })
   };
@@ -59,6 +60,7 @@ export class AppComponent implements OnInit, OnDestroy {
     icon: new L.Icon({
       iconUrl: '../assets/Airport_symbol.svg',
       iconSize: [24, 24],
+      // To make the leaflet canvas marker working properly, we had to provide icon anchor
       iconAnchor: [0, 0]
     })
   };
@@ -66,6 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
     icon: new L.Icon({
       iconUrl: '../assets/building-solid.svg',
       iconSize: [24, 24],
+      // To make the leaflet canvas marker working properly, we had to provide icon anchor
       iconAnchor: [0, 0]
     })
   };
