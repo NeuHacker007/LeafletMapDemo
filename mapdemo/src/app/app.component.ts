@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as L from 'leaflet';
-import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers.standalone';
 import * as Geojson from 'geojson';
+import geojsonvt from 'geojson-vt';
+import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
-import {takeLast} from "rxjs/operators";
 
 const NAUTICAL_MILE_PER_METER = 0.000539957;
 const CIRCLE_RADIUS_IN_NATUTICALMILE = 200;
@@ -23,6 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private acarstationLayer;
   private airportLayer;
   private vdlstationLayer;
+  private acarMarkers: L.Marker[] = [];
 
   private acarStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private acarStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
@@ -31,22 +32,38 @@ export class AppComponent implements OnInit, OnDestroy {
   private vdlStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private vdlStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
 
+  private geojsonvtOption = {
+    maxZoom: 20,  // max zoom to preserve detail on; can't be higher than 24
+    tolerance: 3, // simplification tolerance (higher means simpler)
+    extent: 4096, // tile extent (both width and height)
+    buffer: 64,   // tile buffer on each side
+    debug: 0,     // logging level (0 to disable, 1 or 2)
+    lineMetrics: false, // whether to enable line metrics tracking for LineString/MultiLineString features
+    promoteId: null,    // name of a feature property to promote to feature.id. Cannot be used with `generateId`
+    generateId: false,  // whether to generate feature ids. Cannot be used with `promoteId`
+    indexMaxZoom: 5,       // max zoom in the initial tile index
+    indexMaxPoints: 1000 // max number of points per tile in the index
+
+  }
   private acarStationMakerOption = {
     icon: new L.Icon({
       iconUrl: '../assets/broadcast-tower-solid.svg',
-      iconSize: [24, 24]
+      iconSize: [24, 24],
+      iconAnchor: [0, 0]
     })
   };
   private airportMakerOption = {
     icon: new L.Icon({
       iconUrl: '../assets/Airport_symbol.svg',
-      iconSize: [24, 24]
+      iconSize: [24, 24],
+      iconAnchor: [0, 0]
     })
   };
   private vdlStationMakerOption = {
     icon: new L.Icon({
       iconUrl: '../assets/building-solid.svg',
-      iconSize: [24, 24]
+      iconSize: [24, 24],
+      iconAnchor: [0, 0]
     })
   };
   private readonly acarStationSubscription: Subscription;
@@ -66,7 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
   };
   public options = {
     zoom: 13,
-    center: L.latLng(39.1696, -76.6786,)
+    center: L.latLng(39.1696, -76.6786)
   };
 
   constructor(
@@ -215,14 +232,22 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public onMapReady(map: L.Map) {
     this.leafletMap = map ? map : undefined;
+    const tileindex = geojsonvt(this.acarStationGeoJsonData, this.geojsonvtOption);
+
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
+    this.acarstationLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
+    this.acarstationLayer.addLayers(this.acarMarkers);
+    // this.airportLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
+    // this.vdlstationLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
+
     this.layersControl.overlays = {
       acarstation: this.acarstationLayer,
       airport: this.airportLayer,
       vdlstation: this.vdlstationLayer
     }
+
     this.leafletMap.on("overlayremove", () => {
       if (
         this.leafletMap
@@ -258,13 +283,14 @@ export class AppComponent implements OnInit, OnDestroy {
   private setAcarStationLayerFromGeoJson(): void {
     this.acarstationLayer = L.geoJSON(this.acarStationGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
-          const maker = new L.Marker(latlng, this.acarStationMakerOption).bindTooltip(
+          const marker = new L.Marker(latlng, this.acarStationMakerOption).bindTooltip(
             geoJsonPoint.properties.iata,
             {
               permanent: true,
               offset: L.point(30, 30)
             });
-          return maker;
+          this.acarMarkers.unshift(marker);
+          return marker;
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties
@@ -286,13 +312,13 @@ export class AppComponent implements OnInit, OnDestroy {
   private setAirportLayerFromGeoJson(): void {
     this.airportLayer = L.geoJSON(this.airportGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
-          const maker = new L.Marker(latlng, this.airportMakerOption).bindTooltip(
+          const marker = new L.Marker(latlng, this.airportMakerOption).bindTooltip(
             geoJsonPoint.properties.iata,
             {
               permanent: true,
               offset: L.point(30, 30)
-            })
-          return maker;
+            });
+          return marker;
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties

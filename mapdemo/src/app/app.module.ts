@@ -4,6 +4,7 @@ import {LeafletModule} from '@asymmetrik/ngx-leaflet';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
+import {LeafletDrawModule} from "@asymmetrik/ngx-leaflet-draw";
 
 @NgModule({
   declarations: [
@@ -12,7 +13,8 @@ import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapSer
   imports: [
     BrowserModule,
     AppRoutingModule,
-    LeafletModule.forRoot()
+    LeafletModule.forRoot(),
+    LeafletDrawModule.forRoot()
   ],
   providers: [AsimsAcarsService, AsimsAirportsService, AsimsVdlService],
   bootstrap: [AppComponent]
