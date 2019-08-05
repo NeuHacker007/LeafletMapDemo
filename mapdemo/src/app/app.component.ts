@@ -5,6 +5,7 @@ import geojsonvt from 'geojson-vt';
 import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
+import {mark} from "@angular/compiler-cli/src/ngtsc/perf/src/clock";
 
 const NAUTICAL_MILE_PER_METER = 0.000539957;
 const CIRCLE_RADIUS_IN_NATUTICALMILE = 200;
@@ -24,6 +25,8 @@ export class AppComponent implements OnInit, OnDestroy {
   private airportLayer;
   private vdlstationLayer;
   private acarMarkers: L.Marker[] = [];
+  private airportMarkers: L.Marker[] = [];
+  private vdlMarkers: L.Marker[] = [];
 
   private acarStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private acarStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
@@ -239,45 +242,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setVdlStationLayerFromGeoJson();
     this.acarstationLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
     this.acarstationLayer.addLayers(this.acarMarkers);
-    // this.airportLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
-    // this.vdlstationLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
+    this.airportLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
+    this.airportLayer.addLayers(this.airportMarkers);
+    this.acarstationLayer.addLayers(this.airportMarkers);
+    this.vdlstationLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
+    this.vdlstationLayer.addLayers(this.vdlMarkers);
 
     this.layersControl.overlays = {
       acarstation: this.acarstationLayer,
       airport: this.airportLayer,
       vdlstation: this.vdlstationLayer
-    }
-
-    this.leafletMap.on("overlayremove", () => {
-      if (
-        this.leafletMap
-        && !this.leafletMap.hasLayer(this.acarstationLayer)
-        && this.acarStationCircleTracker.size > 0
-      ) {
-        this.acarStationCircleTracker.forEach((value, key) => {
-          this.leafletMap.removeLayer(value);
-        });
-      }
-      if (
-        this.leafletMap
-        && !this.leafletMap.hasLayer(this.airportLayer)
-        && this.airportCircleTracker.size > 0
-      ) {
-        this.airportCircleTracker.forEach((value, key) => {
-          this.leafletMap.removeLayer(value);
-        });
-      }
-      if (
-        this.leafletMap
-        && !this.leafletMap.hasLayer(this.vdlstationLayer)
-        && this.vdlStationCircleTracker.size > 0
-      ) {
-        this.vdlStationCircleTracker.forEach((value, key) => {
-          this.leafletMap.removeLayer(value);
-        });
-      }
-    });
-
+    };
   }
 
   private setAcarStationLayerFromGeoJson(): void {
@@ -318,12 +293,12 @@ export class AppComponent implements OnInit, OnDestroy {
               permanent: true,
               offset: L.point(30, 30)
             });
+          this.airportMarkers.unshift(marker);
           return marker;
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties
             && feature.properties.iata
-            && feature.properties.frequency
             && feature.properties.numberOfVHFStations
             && feature.properties.airport
             && feature.properties.city
@@ -350,13 +325,14 @@ export class AppComponent implements OnInit, OnDestroy {
   private setVdlStationLayerFromGeoJson(): void {
     this.vdlstationLayer = L.geoJSON(this.vdlGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
-          const maker = new L.Marker(latlng, this.vdlStationMakerOption).bindTooltip(
+          const marker = new L.Marker(latlng, this.vdlStationMakerOption).bindTooltip(
             geoJsonPoint.properties.iata,
             {
               permanent: true,
               offset: L.point(30, 30)
             })
-          return maker;
+          this.vdlMarkers.unshift(marker);
+          return marker;
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties
