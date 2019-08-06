@@ -29,7 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private acarMarkers: L.Marker[] = [];
   private airportMarkers: L.Marker[] = [];
   private vdlMarkers: L.Marker[] = [];
-
+  private canvasmarkerLayers;
   private acarStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private acarStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private airportCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
@@ -254,63 +254,50 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  public onMapReady(map: L.Map) {
+  public addAcarStationLayer(event: MouseEvent): void {
+    this.canvasmarkerLayers.addLayers(this.acarMarkers);
+  }
+
+  public addAirportStationLayer(event: MouseEvent): void {
+    this.canvasmarkerLayers.addLayers(this.airportMarkers);
+  }
+
+  public addVdlStationLayer(event: MouseEvent): void {
+    this.canvasmarkerLayers.addLayers(this.vdlMarkers);
+  }
+
+  public removeAcarStationLayer(event: MouseEvent) {
+    this.acarMarkers.forEach((marker) => {
+        this.canvasmarkerLayers.removeMarker(marker, true);
+      }
+    );
+  }
+
+  public removeAirportStationLayer(event: MouseEvent) {
+    this.airportMarkers.forEach((marker) => {
+        this.canvasmarkerLayers.removeMarker(marker, true);
+      }
+    );
+  }
+
+  public removeVdlStationLayer(event: MouseEvent) {
+    this.vdlMarkers.forEach((marker) => {
+        this.canvasmarkerLayers.removeMarker(marker, true);
+      }
+    );
+  }
+
+  public onMapReady(map: L.Map): void {
     this.leafletMap = map ? map : undefined;
     const tileindex = geojsonvt(this.acarStationGeoJsonData, this.geojsonvtOption);
 
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
-    this.acarstationLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
-    this.acarstationLayer.addLayers(this.acarMarkers);
-    this.airportLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
-    this.airportLayer.addLayers(this.airportMarkers);
-    this.vdlstationLayer = L.canvasIconLayer({}).addTo(this.leafletMap);
-    this.vdlstationLayer.addLayers(this.vdlMarkers);
+    this.canvasmarkerLayers = L.canvasIconLayer({}).addTo(this.leafletMap);
 
-    this.layersControl.overlays = {
-      acarstation: this.acarstationLayer,
-      airport: this.airportLayer,
-      vdlstation: this.vdlstationLayer
-    };
-
-    this.leafletMap.on("overlayremove", () => {
-      if (this.acarstationLayer
-        && this.leafletMap
-        && !this.leafletMap.hasLayer(this.acarstationLayer)
-        && this.acarStationCircleTracker.size > 0) {
-        this.leafletMap.eachLayer((layer) => {
-          this.leafletMap.removeLayer(layer);
-          this.leafletMap.closePopup();
-          layer.closeTooltip();
-        });
-        this.acarStationCircleTracker.clear();
-      }
-      if (this.airportLayer
-        && this.leafletMap
-        && !this.leafletMap.hasLayer(this.airportLayer)
-        && this.airportCircleTracker.size > 0) {
-        this.leafletMap.eachLayer((layer) => {
-          this.leafletMap.removeLayer(layer);
-          this.leafletMap.closePopup();
-          layer.closeTooltip();
-        });
-        this.airportCircleTracker.clear();
-      }
-
-      if (this.vdlstationLayer
-        && this.leafletMap
-        && !this.leafletMap.hasLayer(this.vdlstationLayer)
-        && this.vdlStationCircleTracker.size > 0) {
-        this.leafletMap.eachLayer((layer) => {
-          this.leafletMap.removeLayer(layer);
-          this.leafletMap.closePopup();
-          layer.closeTooltip();
-        });
-        this.acarStationCircleTracker.clear();
-      }
-    });
   }
+
 
   private setAcarStationLayerFromGeoJson(): void {
     this.acarstationGeoLayers = L.geoJSON(this.acarStationGeoJsonData, {
@@ -369,8 +356,7 @@ export class AppComponent implements OnInit, OnDestroy {
             Num of VHF Station: ${feature.properties.numberOfVHFStations} <br>
             City: ${feature.properties.city} <br>
             State: ${feature.properties.state} <br>
-            Country: ${feature.properties.country} <br>
-            Frequency: ${feature.properties.frequency}
+            Country: ${feature.properties.country} 
             `;
             layer.bindPopup(message);
           }
