@@ -294,7 +294,7 @@ export class AppComponent implements OnInit, OnDestroy {
       if (this.airportLayer
         && this.leafletMap
         && !this.leafletMap.hasLayer(this.airportLayer)
-        && this.acarStationCircleTracker.size > 0) {
+        && this.airportCircleTracker.size > 0) {
         this.leafletMap.eachLayer((layer) => {
           this.leafletMap.removeLayer(layer);
           this.leafletMap.closePopup();
@@ -306,7 +306,7 @@ export class AppComponent implements OnInit, OnDestroy {
       if (this.vdlstationLayer
         && this.leafletMap
         && !this.leafletMap.hasLayer(this.vdlstationLayer)
-        && this.acarStationCircleTracker.size > 0) {
+        && this.vdlStationCircleTracker.size > 0) {
         this.leafletMap.eachLayer((layer) => {
           this.leafletMap.removeLayer(layer);
           this.leafletMap.closePopup();
