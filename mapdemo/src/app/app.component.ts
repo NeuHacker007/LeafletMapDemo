@@ -36,6 +36,9 @@ export class AppComponent implements OnInit, OnDestroy {
   private airportMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private vdlStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private vdlStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
+  private isAcarStationOnMap: boolean = false;
+  private isAirportOnMap: boolean = false;
+  private isVdlStationOnMap: boolean = false;
 
   private geojsonvtOption = {
     maxZoom: 20,  // max zoom to preserve detail on; can't be higher than 24
@@ -91,7 +94,8 @@ export class AppComponent implements OnInit, OnDestroy {
   };
   public options = {
     zoom: 13,
-    center: L.latLng(39.1696, -76.6786)
+    center: L.latLng(39.1696, -76.6786),
+    perferCanvas: true
   };
 
   constructor(
@@ -185,11 +189,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public drawAcarStationCircle(event: MouseEvent): void {
-    if (this.acarstationLayer
-      && this.leafletMap
-      && this.leafletMap.hasLayer(this.acarstationLayer)
-      && this.acarMarkers.length > 0
-    ) {
+    if (this.isAcarStationOnMap && this.acarMarkers.length > 0) {
       this.acarMarkers.forEach((marker: L.Marker) => {
         const circle: L.Circle = L.circle(marker._latlng,
           {
@@ -209,11 +209,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public drawAirportCircle(event: MouseEvent): void {
-    if (this.airportLayer
-      && this.leafletMap
-      && this.leafletMap.hasLayer(this.airportLayer)
-      && this.airportMarkers.length > 0
-    ) {
+    if (this.isAirportOnMap && this.airportMarkers.length > 0) {
       this.airportMarkers.forEach((marker: L.Marker) => {
         const circle: L.Circle = L.circle(marker._latlng,
           {
@@ -232,11 +228,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public drawVdlStationCircle(event: MouseEvent): void {
-    if (this.vdlstationLayer
-      && this.leafletMap
-      && this.leafletMap.hasLayer(this.vdlstationLayer)
-      && this.vdlMarkers.length > 0
-    ) {
+    if (this.isVdlStationOnMap && this.vdlMarkers.length > 0) {
       this.vdlMarkers.forEach((marker: L.Marker) => {
         const circle: L.Circle = L.circle(marker._latlng,
           {
@@ -256,28 +248,49 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public addAcarStationLayer(event: MouseEvent): void {
     this.canvasmarkerLayers.addLayers(this.acarMarkers);
+    this.isAcarStationOnMap = true;
   }
 
   public addAirportStationLayer(event: MouseEvent): void {
     this.canvasmarkerLayers.addLayers(this.airportMarkers);
+    this.isAirportOnMap = true;
   }
 
   public addVdlStationLayer(event: MouseEvent): void {
     this.canvasmarkerLayers.addLayers(this.vdlMarkers);
+    this.isVdlStationOnMap = true;
   }
 
   public removeAcarStationLayer(event: MouseEvent) {
-    this.acarMarkers.forEach((marker) => {
+    this.acarMarkers.forEach((marker: L.Marker) => {
+      marker.closePopup();
+      marker.closeTooltip();
         this.canvasmarkerLayers.removeMarker(marker, true);
       }
     );
+    this.isAcarStationOnMap = false;
+    if (this.leafletMap && this.acarStationCircleTracker.size > 0) {
+      this.acarStationCircleTracker.forEach((value, key) => {
+        this.leafletMap.removeLayer(value);
+      });
+      this.acarStationCircleTracker.clear();
+    }
   }
 
   public removeAirportStationLayer(event: MouseEvent) {
-    this.airportMarkers.forEach((marker) => {
+    this.airportMarkers.forEach((marker: L.Marker) => {
+      marker.closePopup();
+      marker.closeTooltip();
         this.canvasmarkerLayers.removeMarker(marker, true);
       }
     );
+    this.isAirportOnMap = false;
+    if (this.leafletMap && this.airportCircleTracker.size > 0) {
+      this.airportCircleTracker.forEach((value, key) => {
+        this.leafletMap.removeLayer(value);
+      });
+      this.airportCircleTracker.clear();
+    }
   }
 
   public removeVdlStationLayer(event: MouseEvent) {
@@ -285,6 +298,13 @@ export class AppComponent implements OnInit, OnDestroy {
         this.canvasmarkerLayers.removeMarker(marker, true);
       }
     );
+    this.isVdlStationOnMap = false;
+    if (this.leafletMap && this.vdlStationCircleTracker.size > 0) {
+      this.vdlStationCircleTracker.forEach((value, key) => {
+        this.leafletMap.removeLayer(value);
+      });
+      this.vdlStationCircleTracker.clear();
+    }
   }
 
   public onMapReady(map: L.Map): void {
