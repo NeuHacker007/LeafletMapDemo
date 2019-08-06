@@ -137,25 +137,30 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public enableToolTip(event: MouseEvent) {
-    if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
-      this.acarstationLayer.eachLayer((layer: L.Layer) => {
-        if (!layer.isTooltipOpen()) {
-          layer.openTooltip();
-        }
+    if (this.acarstationLayer
+      && this.leafletMap
+      && this.leafletMap.hasLayer(this.acarstationLayer)
+      && this.acarMarkers.length > 0
+    ) {
+      this.acarMarkers.forEach((marker: L.Marker) => {
+        marker.closeTooltip();
+      })
+    }
+    if (this.airportLayer
+      && this.leafletMap
+      && this.leafletMap.hasLayer(this.airportLayer)
+      && this.airportMarkers.length > 0) {
+      this.airportMarkers.forEach((marker: L.Marker) => {
+        marker.closeTooltip();
       });
     }
-    if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
-      this.acarstationLayer.eachLayer((layer: L.Layer) => {
-        if (!layer.isTooltipOpen()) {
-          layer.openTooltip();
-        }
-      });
-    }
-    if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
-      this.vdlstationLayer.eachLayer((layer: L.Layer) => {
-        if (!layer.isTooltipOpen()) {
-          layer.openTooltip();
-        }
+    if (this.vdlstationLayer
+      && this.leafletMap
+      && this.leafletMap.hasLayer(this.vdlstationLayer)
+      && this.vdlMarkers.length > 0
+    ) {
+      this.vdlMarkers.forEach((marker: L.Marker) => {
+        marker.closeTooltip();
       });
     }
   }
