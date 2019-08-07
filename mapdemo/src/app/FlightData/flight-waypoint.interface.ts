@@ -1,6 +1,6 @@
-import * as L from 'leaflet';
+import {IFlightCoords} from "./flight-coords.interface";
 
 export interface IFlightWaypoint {
   name: string; // the point corresponding airport name
-  coords: L.LatLng;
+  coords: IFlightCoords;
 }

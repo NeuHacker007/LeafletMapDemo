@@ -3,6 +3,9 @@
   content: url("./assets/broadcast-tower-solid.svg");
 }
 
+.airpline-solid {
+  content: url("./assets/aircraft-dark-blue.svg");
+}
 .mediumIconSize {
   height: 24px;
   width: 24px;

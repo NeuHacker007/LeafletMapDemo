@@ -3,6 +3,7 @@ import * as L from 'leaflet';
 import * as Geojson from 'geojson';
 import geojsonvt from 'geojson-vt';
 import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers';
+import '../../node_modules/leaflet.motion/dist/leaflet.motion.min'
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
 import {FlightRouteService} from "./FlightDataServices";
@@ -43,6 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private isVdlStationOnMap: boolean = false;
   private flightRoutes: Array<IFlightRoute> = [];
 
+
   private geojsonvtOption = {
     maxZoom: 20,  // max zoom to preserve detail on; can't be higher than 24
     tolerance: 3, // simplification tolerance (higher means simpler)
@@ -60,8 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
     icon: new L.Icon({
       iconUrl: '../assets/broadcast-tower-solid.svg',
       iconSize: [24, 24],
-      // To make the leaflet canvas marker working properly, we had to provide icon anchor
-      iconAnchor: [0, 0]
+      iconAnchor: [10, 9]
     })
   };
   private airportMakerOption = {
@@ -69,7 +70,7 @@ export class AppComponent implements OnInit, OnDestroy {
       iconUrl: '../assets/Airport_symbol.svg',
       iconSize: [24, 24],
       // To make the leaflet canvas marker working properly, we had to provide icon anchor
-      iconAnchor: [0, 0]
+      iconAnchor: [10, 9]
     })
   };
   private vdlStationMakerOption = {
@@ -77,7 +78,7 @@ export class AppComponent implements OnInit, OnDestroy {
       iconUrl: '../assets/building-solid.svg',
       iconSize: [24, 24],
       // To make the leaflet canvas marker working properly, we had to provide icon anchor
-      iconAnchor: [0, 0]
+      iconAnchor: [10, 9]
     })
   };
   private readonly acarStationSubscription: Subscription;
@@ -88,7 +89,6 @@ export class AppComponent implements OnInit, OnDestroy {
     maxZoom: 13,
     attribution: 'Open Street Map'
   });
-
   public layers: L.Layer[] = [];
   public layersControl = {
     baseLayers: {
@@ -333,9 +333,29 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  public drawFlightRoute(event: MouseEvent) {
+    const seqGroup = L.motion.seq([
+      L.motion.polyline([this.flightRoutes[0].wayPoints[0].coords, this.flightRoutes[0].wayPoints[1].coords, this.flightRoutes[0].wayPoints[2].coords], {
+          color: 'indigo'
+        },
+        {
+          speed: this.flightRoutes[0].speed
+        },
+        {
+          removeOnEnd: true,
+          icon: L.divIcon({
+            html: "<i class='airpline-solid' aria-hidden='true' motion-base='-45'></i>",
+            iconSize: L.point(24, 24)
+          })
+        })
+    ]).addTo(this.leafletMap);
+    seqGroup.motionStart();
+  }
+
   public onMapReady(map: L.Map): void {
     this.leafletMap = map ? map : undefined;
     const tileindex = geojsonvt(this.acarStationGeoJsonData, this.geojsonvtOption);
+    this.leafletMap.setView([39.1696, -76.6786], 13);
 
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
