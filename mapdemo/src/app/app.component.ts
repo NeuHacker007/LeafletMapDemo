@@ -5,6 +5,8 @@ import geojsonvt from 'geojson-vt';
 import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
+import {FlightRouteService} from "./FlightDataServices";
+import {IFlightRoute} from "./FlightData";
 
 const NAUTICAL_MILE_PER_METER = 0.000539957;
 const CIRCLE_RADIUS_IN_NATUTICALMILE = 200;
@@ -39,6 +41,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private isAcarStationOnMap: boolean = false;
   private isAirportOnMap: boolean = false;
   private isVdlStationOnMap: boolean = false;
+  private flightRoutes: Array<IFlightRoute> = [];
 
   private geojsonvtOption = {
     maxZoom: 20,  // max zoom to preserve detail on; can't be higher than 24
@@ -80,6 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly acarStationSubscription: Subscription;
   private readonly airportSubscription: Subscription;
   private readonly vdlStationSubscription: Subscription;
+  private readonly flightRoutesSubscription: Subscription;
   private readonly LAYER_OSM = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 13,
     attribution: 'Open Street Map'
@@ -101,18 +105,37 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private acarsDataService: AsimsAcarsService,
     private airportDataService: AsimsAirportsService,
-    private vdlDataService: AsimsVdlService) {
+    private vdlDataService: AsimsVdlService,
+    private flightRouteService: FlightRouteService
+  ) {
 
-    this.acarStationSubscription = acarsDataService.getData().subscribe((result) => {
-      this.acarStationGeoJsonData = result;
+    this.acarStationSubscription = this.acarsDataService.getData().subscribe((result) => {
+      if (result) {
+        this.acarStationGeoJsonData = result;
+      } else {
+        console.log('emitted acar station data is not valid');
+      }
     });
-    this.airportSubscription = airportDataService.getData().subscribe((result) => {
-      this.airportGeoJsonData = result;
-    });
-    this.vdlStationSubscription = vdlDataService.getData().subscribe((result) => {
-      this.vdlGeoJsonData = result;
-    });
+    this.airportSubscription = this.airportDataService.getData().subscribe((result) => {
+      if (result) {
+        this.airportGeoJsonData = result;
+      } else {
+        console.log('emitted airport station data is not valid');
+      }
 
+    });
+    this.vdlStationSubscription = this.vdlDataService.getData().subscribe((result) => {
+      if (result) {
+        this.vdlGeoJsonData = result;
+      } else {
+        console.log('emitted vdl station data is not valid');
+      }
+    });
+    this.flightRoutesSubscription = this.flightRouteService.getFlightRouteData().subscribe((result) => {
+      if (result) {
+        this.flightRoutes = result;
+      }
+    });
   }
 
   public ngOnInit(): void {
@@ -128,6 +151,9 @@ export class AppComponent implements OnInit, OnDestroy {
     }
     if (this.vdlStationSubscription) {
       this.vdlStationSubscription.unsubscribe();
+    }
+    if (this.flightRoutesSubscription) {
+      this.flightRoutesSubscription.unsubscribe();
     }
     if (this.acarMarkers.length > 0) {
       this.acarMarkers = [];
@@ -315,7 +341,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
     this.canvasmarkerLayers = L.canvasIconLayer({}).addTo(this.leafletMap);
-
   }
 
 

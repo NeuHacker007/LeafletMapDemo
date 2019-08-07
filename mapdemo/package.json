@@ -31,6 +31,7 @@
     "leaflet-canvas-marker-labinno": "^1.0.0",
     "leaflet-draw": "^1.0.4",
     "leaflet.markercluster": "^1.4.1",
+    "leaflet.motion": "^0.1.4",
     "popper.js": "^1.14.7",
     "rbush": "^2.0.2",
     "rxjs": "~6.4.0",
