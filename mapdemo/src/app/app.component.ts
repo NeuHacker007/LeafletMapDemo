@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as L from 'leaflet';
-import * as Geojson from 'geojson';
 import geojsonvt from 'geojson-vt';
 import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers';
-import '../../node_modules/leaflet.motion/dist/leaflet.motion.min'
+import '../../node_modules/leaflet.motion/dist/leaflet.motion.min';
+import '../../node_modules/leaflet-textpath/leaflet.textpath'
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
 import {FlightRouteService} from "./FlightDataServices";
@@ -167,51 +167,51 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public enableToolTip(event: MouseEvent) {
-    if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
-      this.acarstationLayer.eachLayer((layer: L.Layer) => {
-        if (!layer.isTooltipOpen()) {
-          layer.openTooltip();
-        }
-      });
-    }
-    if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
-      this.acarstationLayer.eachLayer((layer: L.Layer) => {
-        if (!layer.isTooltipOpen()) {
-          layer.openTooltip();
-        }
-      });
-    }
-    if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
-      this.vdlstationLayer.eachLayer((layer: L.Layer) => {
-        if (!layer.isTooltipOpen()) {
-          layer.openTooltip();
-        }
-      });
-    }
+    // if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
+    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
+    //     if (!layer.isTooltipOpen()) {
+    //       layer.openTooltip();
+    //     }
+    //   });
+    // }
+    // if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
+    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
+    //     if (!layer.isTooltipOpen()) {
+    //       layer.openTooltip();
+    //     }
+    //   });
+    // }
+    // if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
+    //   this.vdlstationLayer.eachLayer((layer: L.Layer) => {
+    //     if (!layer.isTooltipOpen()) {
+    //       layer.openTooltip();
+    //     }
+    //   });
+    // }
   }
 
   public disableToolTip(event: MouseEvent) {
-    if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
-      this.acarstationLayer.eachLayer((layer: L.Layer) => {
-        if (layer.isTooltipOpen()) {
-          layer.closeTooltip();
-        }
-      });
-    }
-    if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
-      this.acarstationLayer.eachLayer((layer: L.Layer) => {
-        if (layer.isTooltipOpen()) {
-          layer.closeTooltip();
-        }
-      });
-    }
-    if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
-      this.vdlstationLayer.eachLayer((layer: L.Layer) => {
-        if (layer.isTooltipOpen()) {
-          layer.closeTooltip();
-        }
-      });
-    }
+    // if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
+    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
+    //     if (layer.isTooltipOpen()) {
+    //       layer.closeTooltip();
+    //     }
+    //   });
+    // }
+    // if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
+    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
+    //     if (layer.isTooltipOpen()) {
+    //       layer.closeTooltip();
+    //     }
+    //   });
+    // }
+    // if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
+    //   this.vdlstationLayer.eachLayer((layer: L.Layer) => {
+    //     if (layer.isTooltipOpen()) {
+    //       layer.closeTooltip();
+    //     }
+    //   });
+    // }
   }
 
   public drawAcarStationCircle(event: MouseEvent): void {
@@ -273,6 +273,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public addAcarStationLayer(event: MouseEvent): void {
+
     this.canvasmarkerLayers.addLayers(this.acarMarkers);
     this.isAcarStationOnMap = true;
   }
@@ -355,15 +356,22 @@ export class AppComponent implements OnInit, OnDestroy {
   public onMapReady(map: L.Map): void {
     this.leafletMap = map ? map : undefined;
     const tileindex = geojsonvt(this.acarStationGeoJsonData, this.geojsonvtOption);
-    this.leafletMap.setView([39.1696, -76.6786], 13);
+    //this.leafletMap.setView([39.1696, -76.6786], 13);
 
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
     this.canvasmarkerLayers = L.canvasIconLayer({}).addTo(this.leafletMap);
+    this.canvasmarkerLayers.addLayer(new L.Marker([0, 0], {
+      icon: new L.Icon({
+        iconUrl: '',
+        iconSize: [0, 0],
+        // To make the leaflet canvas marker working properly, we had to provide icon anchor
+        iconAnchor: [0, 0]
+      })
+    }));
+
   }
-
-
   private setAcarStationLayerFromGeoJson(): void {
     this.acarstationGeoLayers = L.geoJSON(this.acarStationGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {

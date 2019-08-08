@@ -10,7 +10,7 @@ export const flightRoutes: Array<IFlightRoute> = [
       destinationAirport: 'SFO',
       vias: ['BOS', 'BWI', 'SFO'], // order matters
       altitude: 10000,// feet
-      speed: 9100,// km/h
+      speed: 91000,// km/h
       countryCode: 'USA',
       wayPoints: [
         {
