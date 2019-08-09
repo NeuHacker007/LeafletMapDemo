@@ -2,8 +2,8 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as L from 'leaflet';
 import geojsonvt from 'geojson-vt';
 import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers';
+import '../../node_modules/leaflet-textpath/leaflet.textpath';
 import '../../node_modules/leaflet.motion/dist/leaflet.motion.min';
-import '../../node_modules/leaflet-textpath/leaflet.textpath'
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {Subscription} from "rxjs";
 import {FlightRouteService} from "./FlightDataServices";
@@ -43,6 +43,9 @@ export class AppComponent implements OnInit, OnDestroy {
   private isAirportOnMap: boolean = false;
   private isVdlStationOnMap: boolean = false;
   private flightRoutes: Array<IFlightRoute> = [];
+  private flightPolyline;
+  private flightRouteSequenceGroup;
+  private isCurrentFlightMotionEnd: boolean = false;
 
 
   private geojsonvtOption = {
@@ -335,24 +338,38 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public drawFlightRoute(event: MouseEvent) {
-    const seqGroup = L.motion.seq([
-      L.motion.polyline([this.flightRoutes[0].wayPoints[0].coords, this.flightRoutes[0].wayPoints[1].coords, this.flightRoutes[0].wayPoints[2].coords], {
-          color: 'indigo'
-        },
-        {
-          speed: this.flightRoutes[0].speed
-        },
-        {
-          removeOnEnd: true,
-          icon: L.divIcon({
-            html: "<i class='airpline-solid' aria-hidden='true' motion-base='-45'></i>",
-            iconSize: L.point(24, 24)
-          })
+    const a = 'hahaah';
+    this.flightPolyline = L.motion.polyline([this.flightRoutes[0].wayPoints[0].coords, this.flightRoutes[0].wayPoints[1].coords, this.flightRoutes[0].wayPoints[2].coords], {
+        color: 'indigo'
+      },
+      {
+        speed: this.flightRoutes[0].speed
+      },
+      {
+        removeOnEnd: true,
+        icon: L.divIcon({
+          html: `<i class="airpline-solid" motion-base="-45" (click)="alert(${a});"></i>`,
+          iconSize: L.point(24, 24)
         })
+      });
+    this.flightRouteSequenceGroup = L.motion.seq([
+      this.flightPolyline
     ]).addTo(this.leafletMap);
-    seqGroup.motionStart();
+
+    // line.setText(`from ${this.flightRoutes[0].vias[0]} via ${this.flightRoutes[0].vias[1]} to ${this.flightRoutes[0].vias[2]}`);
+    this.flightRouteSequenceGroup.motionStart();
+    this.flightRouteSequenceGroup.on(L.Motion.Event.Ended, () => {
+        this.isCurrentFlightMotionEnd = true;
+      }
+    );
   }
 
+  public RemoveFlightRoute(event: MouseEvent) {
+    if (this.flightPolyline) {
+      this.leafletMap.removeLayer(this.flightRouteSequenceGroup);
+      this.isCurrentFlightMotionEnd = false;
+    }
+  }
   public onMapReady(map: L.Map): void {
     this.leafletMap = map ? map : undefined;
     const tileindex = geojsonvt(this.acarStationGeoJsonData, this.geojsonvtOption);
