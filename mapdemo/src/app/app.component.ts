@@ -276,19 +276,31 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public addAcarStationLayer(event: MouseEvent): void {
-
-    this.canvasmarkerLayers.addLayers(this.acarMarkers);
-    this.isAcarStationOnMap = true;
+    if (this.canvasmarkerLayers && !this.isAcarStationOnMap) {
+      this.canvasmarkerLayers.addLayers(this.acarMarkers);
+      this.isAcarStationOnMap = true;
+    } else {
+      alert(`canvas not exists or acar stations have already been added to map`);
+    }
   }
 
   public addAirportStationLayer(event: MouseEvent): void {
-    this.canvasmarkerLayers.addLayers(this.airportMarkers);
-    this.isAirportOnMap = true;
+    if (this.canvasmarkerLayers && !this.isAirportOnMap) {
+      this.canvasmarkerLayers.addLayers(this.airportMarkers);
+      this.isAirportOnMap = true;
+    } else {
+      alert(`canvas not exists or airports have already been added to map`);
+    }
+
   }
 
   public addVdlStationLayer(event: MouseEvent): void {
-    this.canvasmarkerLayers.addLayers(this.vdlMarkers);
-    this.isVdlStationOnMap = true;
+    if (this.canvasmarkerLayers && !this.isVdlStationOnMap) {
+      this.canvasmarkerLayers.addLayers(this.vdlMarkers);
+      this.isVdlStationOnMap = true;
+    } else {
+      alert(`canvas not exists or vdl stations have already been added to map`);
+    }
   }
 
   public removeAcarStationLayer(event: MouseEvent) {
@@ -421,6 +433,12 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
+
+    this.initializeCanvasMarker();
+
+  }
+
+  private initializeCanvasMarker(): void {
     this.canvasmarkerLayers = L.canvasIconLayer({}).addTo(this.leafletMap);
     this.canvasmarkerLayers.addLayer(new L.Marker([0, 0], {
       icon: new L.Icon({
@@ -430,9 +448,7 @@ export class AppComponent implements OnInit, OnDestroy {
         iconAnchor: [0, 0]
       })
     }));
-
   }
-
   private setAcarStationLayerFromGeoJson(): void {
     this.acarstationGeoLayers = L.geoJSON(this.acarStationGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
