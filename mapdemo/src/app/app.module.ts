@@ -5,6 +5,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapServices";
 import {LeafletDrawModule} from "@asymmetrik/ngx-leaflet-draw";
+import {FlightRouteService} from "./FlightDataServices";
 
 @NgModule({
   declarations: [
@@ -16,7 +17,7 @@ import {LeafletDrawModule} from "@asymmetrik/ngx-leaflet-draw";
     LeafletModule.forRoot(),
     LeafletDrawModule.forRoot()
   ],
-  providers: [AsimsAcarsService, AsimsAirportsService, AsimsVdlService],
+  providers: [AsimsAcarsService, AsimsAirportsService, AsimsVdlService, FlightRouteService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

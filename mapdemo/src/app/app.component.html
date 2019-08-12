@@ -3,6 +3,15 @@
 <button class="btn btn-primary buttonPadding" (click)="drawAcarStationCircle($event)">Draw Acar Station Circle</button>
 <button class="btn btn-primary buttonPadding" (click)="drawAirportCircle($event)">Draw Airport Circle</button>
 <button class="btn btn-primary buttonPadding" (click)="drawVdlStationCircle($event)">Draw Vdl Station Circle</button>
+<button class="btn btn-primary buttonPadding" (click)="addAcarStationLayer($event)">Show AcarStation</button>
+<button class="btn btn-primary buttonPadding" (click)="addAirportStationLayer($event)">Show AirportStation</button>
+<button class="btn btn-primary buttonPadding" (click)="addVdlStationLayer($event)">Show VDL statation</button>
+<button class="btn btn-primary buttonPadding" (click)="removeAcarStationLayer($event)">Remove AcarStation</button>
+<button class="btn btn-primary buttonPadding" (click)="removeAirportStationLayer($event)">Remove AirportStation</button>
+<button class="btn btn-primary buttonPadding" (click)="removeVdlStationLayer($event)">Remove VDL statation</button>
+<button class="btn btn-primary buttonPadding" (click)="drawFlightRoute($event)">Draw Flight Route</button>
+<button class="btn btn-primary buttonPadding" (click)="RemoveFlightRoute($event)">Remove Flight Route</button>
+
 <div leaflet style="height: 100vh;"
      [leafletOptions]="options"
      [leafletLayers]="layers"
