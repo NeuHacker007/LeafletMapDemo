@@ -292,13 +292,18 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public removeAcarStationLayer(event: MouseEvent) {
-    this.acarMarkers.forEach((marker: L.Marker) => {
-      marker.closePopup();
-      marker.closeTooltip();
-        this.canvasmarkerLayers.removeMarker(marker, true);
-      }
-    );
-    this.isAcarStationOnMap = false;
+    if (this.isAcarStationOnMap) {
+      this.acarMarkers.forEach((marker: L.Marker) => {
+          marker.closePopup();
+          marker.closeTooltip();
+          this.canvasmarkerLayers.removeMarker(marker, true);
+        }
+      );
+      this.isAcarStationOnMap = false;
+    } else {
+      alert('acarstation is not on map');
+    }
+
     if (this.leafletMap && this.acarStationCircleTracker.size > 0) {
       this.acarStationCircleTracker.forEach((value, key) => {
         this.leafletMap.removeLayer(value);
@@ -308,13 +313,17 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public removeAirportStationLayer(event: MouseEvent) {
-    this.airportMarkers.forEach((marker: L.Marker) => {
-      marker.closePopup();
-      marker.closeTooltip();
-        this.canvasmarkerLayers.removeMarker(marker, true);
-      }
-    );
-    this.isAirportOnMap = false;
+    if (this.isAirportOnMap) {
+      this.airportMarkers.forEach((marker: L.Marker) => {
+          marker.closePopup();
+          marker.closeTooltip();
+          this.canvasmarkerLayers.removeMarker(marker, true);
+        }
+      );
+      this.isAirportOnMap = false;
+    } else {
+      alert('airport is not on map');
+    }
     if (this.leafletMap && this.airportCircleTracker.size > 0) {
       this.airportCircleTracker.forEach((value, key) => {
         this.leafletMap.removeLayer(value);
@@ -324,11 +333,17 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public removeVdlStationLayer(event: MouseEvent) {
-    this.vdlMarkers.forEach((marker) => {
-        this.canvasmarkerLayers.removeMarker(marker, true);
-      }
-    );
-    this.isVdlStationOnMap = false;
+    if (this.isVdlStationOnMap) {
+      this.vdlMarkers.forEach((marker) => {
+          marker.closePopup();
+          marker.closeTooltip();
+          this.canvasmarkerLayers.removeMarker(marker, true);
+        }
+      );
+      this.isVdlStationOnMap = false;
+    } else {
+      alert('vdl station is not on map');
+    }
     if (this.leafletMap && this.vdlStationCircleTracker.size > 0) {
       this.vdlStationCircleTracker.forEach((value, key) => {
         this.leafletMap.removeLayer(value);
@@ -338,9 +353,30 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public drawFlightRoute(event: MouseEvent) {
-    const a = 'hahaah';
+    const line = L.polyline([this.flightRoutes[0].wayPoints[0].coords, this.flightRoutes[0].wayPoints[1].coords, this.flightRoutes[0].wayPoints[2].coords]).addTo(this.leafletMap);
+    line.setText(`from ${this.flightRoutes[0].vias[0]} via ${this.flightRoutes[0].vias[1]} to ${this.flightRoutes[0].vias[2]}`,
+      {
+        center: true,
+        below: true,
+        offset: 10,
+        orientation: 'flip'
+      });
+    const message = `
+      I am an Aircraft <br>
+      iata: ${this.flightRoutes[0].iata} <br>
+      flightNumber: ${this.flightRoutes[0].flightNumber} <br>
+      aircraftType: ${this.flightRoutes[0].aircraftType} <br>
+      aircraftRegistration: ${this.flightRoutes[0].aircraftRegistration} <br>
+      originAirport: ${this.flightRoutes[0].originAirport} <br>
+      destinationAirport: ${this.flightRoutes[0].destinationAirport} <br>
+      vias: ${this.flightRoutes[0].vias[0]}, ${this.flightRoutes[0].vias[1]},${this.flightRoutes[0].vias[2]}  <br>
+      altitude: ${this.flightRoutes[0].altitude} <br>
+      speed: ${this.flightRoutes[0].speed} KM/H <br>
+      country: ${this.flightRoutes[0].countryCode}
+    `;
+    //line.bindPopup(message);
     this.flightPolyline = L.motion.polyline([this.flightRoutes[0].wayPoints[0].coords, this.flightRoutes[0].wayPoints[1].coords, this.flightRoutes[0].wayPoints[2].coords], {
-        color: 'indigo'
+        color: 'red'
       },
       {
         speed: this.flightRoutes[0].speed
@@ -348,33 +384,40 @@ export class AppComponent implements OnInit, OnDestroy {
       {
         removeOnEnd: true,
         icon: L.divIcon({
-          html: `<i class="airpline-solid" motion-base="-45" (click)="alert(${a});"></i>`,
+          html: `<i class="airpline-solid" motion-base="-45"></i>`,
           iconSize: L.point(24, 24)
         })
       });
+    this.flightPolyline.bindPopup(message);
     this.flightRouteSequenceGroup = L.motion.seq([
       this.flightPolyline
     ]).addTo(this.leafletMap);
 
-    // line.setText(`from ${this.flightRoutes[0].vias[0]} via ${this.flightRoutes[0].vias[1]} to ${this.flightRoutes[0].vias[2]}`);
+
     this.flightRouteSequenceGroup.motionStart();
-    this.flightRouteSequenceGroup.on(L.Motion.Event.Ended, () => {
+    this.flightRouteSequenceGroup.on(L.Motion.Event.Started, (e) => {
+      this.flightPolyline.setText(`from ${this.flightRoutes[0].vias[0]} via ${this.flightRoutes[0].vias[1]} to ${this.flightRoutes[0].vias[2]}`);
+      console.log();
+      }
+    );
+    this.flightRouteSequenceGroup.on(L.Motion.Event.Ended, (e) => {
         this.isCurrentFlightMotionEnd = true;
+        console.log(e);
       }
     );
   }
 
   public RemoveFlightRoute(event: MouseEvent) {
-    if (this.flightPolyline) {
+    if (this.flightPolyline && this.isCurrentFlightMotionEnd) {
       this.leafletMap.removeLayer(this.flightRouteSequenceGroup);
       this.isCurrentFlightMotionEnd = false;
+    } else {
+      alert('flight in on the way cannot remove the route');
     }
   }
+
   public onMapReady(map: L.Map): void {
     this.leafletMap = map ? map : undefined;
-    const tileindex = geojsonvt(this.acarStationGeoJsonData, this.geojsonvtOption);
-    //this.leafletMap.setView([39.1696, -76.6786], 13);
-
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
@@ -389,6 +432,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }));
 
   }
+
   private setAcarStationLayerFromGeoJson(): void {
     this.acarstationGeoLayers = L.geoJSON(this.acarStationGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
