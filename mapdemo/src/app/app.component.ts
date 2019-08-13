@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as L from 'leaflet';
-import geojsonvt from 'geojson-vt';
 import '../../node_modules/leaflet-canvas-marker-labinno/dist/leaflet.canvas-markers';
 import '../../node_modules/leaflet-textpath/leaflet.textpath';
 import '../../node_modules/leaflet.motion/dist/leaflet.motion.min';
@@ -8,6 +7,8 @@ import {AsimsAcarsService, AsimsAirportsService, AsimsVdlService} from "./MapSer
 import {Subscription} from "rxjs";
 import {FlightRouteService} from "./FlightDataServices";
 import {IFlightRoute} from "./FlightData";
+import {IMarkerTooltip} from "./MarkerDataModel";
+import * as geoJson from "geojson";
 
 const NAUTICAL_MILE_PER_METER = 0.000539957;
 const CIRCLE_RADIUS_IN_NATUTICALMILE = 200;
@@ -23,22 +24,19 @@ export class AppComponent implements OnInit, OnDestroy {
   private acarStationGeoJsonData;
   private airportGeoJsonData;
   private vdlGeoJsonData;
-  private acarstationLayer;
   private acarstationGeoLayers: L.Layer[];
-  private airportLayer;
   private airportGeoLayers: L.Layer[];
-  private vdlstationLayer;
   private vdlstationGeoLayers: L.Layer[];
   private acarMarkers: L.Marker[] = [];
   private airportMarkers: L.Marker[] = [];
   private vdlMarkers: L.Marker[] = [];
+  private acarMarkersTootips: Array<IMarkerTooltip> = [];
+  private airportMarkersTootips: Array<IMarkerTooltip> = [];
+  private vdlMarkersTootips: Array<IMarkerTooltip> = [];
   private canvasmarkerLayers;
   private acarStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
-  private acarStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private airportCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
-  private airportMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private vdlStationCircleTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
-  private vdlStationMarkerTracker: Map<number[], L.Circle> = new Map<number[], L.Circle>();
   private isAcarStationOnMap: boolean = false;
   private isAirportOnMap: boolean = false;
   private isVdlStationOnMap: boolean = false;
@@ -47,20 +45,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private flightRouteSequenceGroup;
   private isCurrentFlightMotionEnd: boolean = false;
 
-
-  private geojsonvtOption = {
-    maxZoom: 20,  // max zoom to preserve detail on; can't be higher than 24
-    tolerance: 3, // simplification tolerance (higher means simpler)
-    extent: 4096, // tile extent (both width and height)
-    buffer: 64,   // tile buffer on each side
-    debug: 0,     // logging level (0 to disable, 1 or 2)
-    lineMetrics: false, // whether to enable line metrics tracking for LineString/MultiLineString features
-    promoteId: null,    // name of a feature property to promote to feature.id. Cannot be used with `generateId`
-    generateId: false,  // whether to generate feature ids. Cannot be used with `promoteId`
-    indexMaxZoom: 5,       // max zoom in the initial tile index
-    indexMaxPoints: 1000 // max number of points per tile in the index
-
-  }
   private acarStationMakerOption = {
     icon: new L.Icon({
       iconUrl: '../assets/broadcast-tower-solid.svg',
@@ -170,51 +154,37 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public enableToolTip(event: MouseEvent) {
-    // if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
-    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
-    //     if (!layer.isTooltipOpen()) {
-    //       layer.openTooltip();
-    //     }
-    //   });
-    // }
-    // if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
-    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
-    //     if (!layer.isTooltipOpen()) {
-    //       layer.openTooltip();
-    //     }
-    //   });
-    // }
-    // if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
-    //   this.vdlstationLayer.eachLayer((layer: L.Layer) => {
-    //     if (!layer.isTooltipOpen()) {
-    //       layer.openTooltip();
-    //     }
-    //   });
-    // }
+    if (this.acarMarkersTootips && this.acarMarkersTootips.length > 0 && this.isAcarStationOnMap) {
+      this.acarMarkersTootips.forEach((item: IMarkerTooltip) => {
+        item.marker.setTooltipContent(item.geoJsonPoint.properties.iata);
+        item.marker.openTooltip();
+      });
+    } else {
+      alert('acar marks is not on map');
+    }
+    if (this.airportMarkersTootips && this.airportMarkersTootips.length > 0 && this.isAirportOnMap) {
+      this.airportMarkersTootips.forEach((item: IMarkerTooltip) => {
+        item.marker.setTooltipContent(item.geoJsonPoint.properties.iata);
+        item.marker.openTooltip();
+      });
+    } else {
+      alert('airport marks is not on map');
+    }
+    if (this.vdlMarkersTootips && this.vdlMarkersTootips.length > 0 && this.isVdlStationOnMap) {
+      this.vdlMarkersTootips.forEach((item: IMarkerTooltip) => {
+        item.marker.setTooltipContent(item.geoJsonPoint.properties.iata);
+        item.marker.openTooltip();
+      });
+    } else {
+      alert('vdl marks is not on map');
+    }
   }
 
   public disableToolTip(event: MouseEvent) {
-    // if (this.acarstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.acarstationLayer)) {
-    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
-    //     if (layer.isTooltipOpen()) {
-    //       layer.closeTooltip();
-    //     }
-    //   });
-    // }
-    // if (this.airportLayer && this.leafletMap && this.leafletMap.hasLayer(this.airportLayer)) {
-    //   this.acarstationLayer.eachLayer((layer: L.Layer) => {
-    //     if (layer.isTooltipOpen()) {
-    //       layer.closeTooltip();
-    //     }
-    //   });
-    // }
-    // if (this.vdlstationLayer && this.leafletMap && this.leafletMap.hasLayer(this.vdlstationLayer)) {
-    //   this.vdlstationLayer.eachLayer((layer: L.Layer) => {
-    //     if (layer.isTooltipOpen()) {
-    //       layer.closeTooltip();
-    //     }
-    //   });
-    // }
+    this.acarMarkersTootips.forEach((item: IMarkerTooltip) => {
+      //item.marker.setTooltipContent(item.geoJsonPoint.properties.iata);
+      item.marker.closeTooltip();
+    });
   }
 
   public drawAcarStationCircle(event: MouseEvent): void {
@@ -438,6 +408,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   }
 
+  private setMarkerTooltip(markerToolips: Array<IMarkerTooltip>): void {
+
+  }
+
   private initializeCanvasMarker(): void {
     this.canvasmarkerLayers = L.canvasIconLayer({}).addTo(this.leafletMap);
     this.canvasmarkerLayers.addLayer(new L.Marker([0, 0], {
@@ -449,15 +423,21 @@ export class AppComponent implements OnInit, OnDestroy {
       })
     }));
   }
+
   private setAcarStationLayerFromGeoJson(): void {
     this.acarstationGeoLayers = L.geoJSON(this.acarStationGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
-          const marker = new L.Marker(latlng, this.acarStationMakerOption).bindTooltip(
-            geoJsonPoint.properties.iata,
+          const marker = new L.Marker(latlng, this.acarStationMakerOption).bindTooltip('', {
+            permanent: true,
+            direction: 'bottom'
+          });
+          this.acarMarkersTootips.push(
             {
-              permanent: true,
-              offset: L.point(30, 30)
-            });
+              marker: marker,
+              latLng: latlng,
+              geoJsonPoint: geoJsonPoint
+            }
+          );
           this.acarMarkers.unshift(marker);
           return marker;
         },
@@ -481,12 +461,17 @@ export class AppComponent implements OnInit, OnDestroy {
   private setAirportLayerFromGeoJson(): void {
     this.airportGeoLayers = L.geoJSON(this.airportGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
-          const marker = new L.Marker(latlng, this.airportMakerOption).bindTooltip(
-            geoJsonPoint.properties.iata,
+          const marker = new L.Marker(latlng, this.airportMakerOption).bindTooltip('', {
+            permanent: true,
+            direction: 'bottom'
+          });
+          this.airportMarkersTootips.push(
             {
-              permanent: true,
-              offset: L.point(30, 30)
-            });
+              marker: marker,
+              latLng: latlng,
+              geoJsonPoint: geoJsonPoint
+            }
+          );
           this.airportMarkers.unshift(marker);
           return marker;
         },
@@ -518,12 +503,17 @@ export class AppComponent implements OnInit, OnDestroy {
   private setVdlStationLayerFromGeoJson(): void {
     this.vdlstationGeoLayers = L.geoJSON(this.vdlGeoJsonData, {
         pointToLayer: (geoJsonPoint, latlng): L.Layer => {
-          const marker = new L.Marker(latlng, this.vdlStationMakerOption).bindTooltip(
-            geoJsonPoint.properties.iata,
+          const marker = new L.Marker(latlng, this.vdlStationMakerOption).bindTooltip('', {
+            permanent: true,
+            direction: 'bottom'
+          });
+          this.vdlMarkersTootips.push(
             {
-              permanent: true,
-              offset: L.point(30, 30)
-            })
+              marker: marker,
+              latLng: latlng,
+              geoJsonPoint: geoJsonPoint
+            }
+          );
           this.vdlMarkers.unshift(marker);
           return marker;
         },
