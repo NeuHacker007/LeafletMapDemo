@@ -185,6 +185,14 @@ export class AppComponent implements OnInit, OnDestroy {
       //item.marker.setTooltipContent(item.geoJsonPoint.properties.iata);
       item.marker.closeTooltip();
     });
+    this.airportMarkersTootips.forEach((item: IMarkerTooltip) => {
+      //item.marker.setTooltipContent(item.geoJsonPoint.properties.iata);
+      item.marker.closeTooltip();
+    });
+    this.vdlMarkersTootips.forEach((item: IMarkerTooltip) => {
+      //item.marker.setTooltipContent(item.geoJsonPoint.properties.iata);
+      item.marker.closeTooltip();
+    });
   }
 
   public drawAcarStationCircle(event: MouseEvent): void {
@@ -403,7 +411,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setAcarStationLayerFromGeoJson();
     this.setAirportLayerFromGeoJson();
     this.setVdlStationLayerFromGeoJson();
-
     this.initializeCanvasMarker();
 
   }
